@@ -1,15 +1,13 @@
-const CALL_ENDPOINT = 'ws://localhost:8443/call';
-const ws = new WebSocket(CALL_ENDPOINT);
-const OPEN = 1;
+import {sendMessage, setHandlers} from "./socket.js";
 
+
+//bi
+const IceCandidateMessage = 'IceCandidateMessage';
 // in
-const IceCandidateOffer = 'IceCandidateOffer';
-const PresenterOfferMessage = 'PresenterOfferMessage';
-const ViewerOfferMessage = 'ViewerOfferMessage';
+const StartStreamMessage = 'StartStreamMessage';
+const StartWatchMessage = 'StartWatchMessage';
 // out
-const AcceptedPresenterResponse = 'AcceptedPresenterResponse';
-const AcceptedViewerResponse = 'AcceptedViewerResponse';
-const IceCandidateResponse = 'IceCandidateResponse';
+const SdpAnswerMessage = 'SdpAnswerMessage';
 
 const video = document.querySelector('#stream');
 const btnStartWatch = document.querySelector('#watch');
@@ -28,16 +26,6 @@ const displayMediaConstraints = {
 let localStream;
 let peerConnection;
 
-
-const sendMessage = (type, content) => {
-    if (ws.readyState === OPEN) {
-        const message = {type, ...content};
-        const jsonMessage = JSON.stringify(message)
-        ws.send(jsonMessage);
-        console.info(`Send message: ${jsonMessage}`)
-    }
-};
-
 const createPeerConnection = () => {
     const configuration = {
         'iceServers': [
@@ -50,7 +38,7 @@ const createPeerConnection = () => {
     peerConnection.onicecandidate = async event => {
         const iceCandidate = event.candidate;
         if (iceCandidate) {
-            sendMessage(IceCandidateOffer, {
+            sendMessage(IceCandidateMessage, {
                 candidate: iceCandidate
             })
             return;
@@ -59,11 +47,11 @@ const createPeerConnection = () => {
     };
     peerConnection.ontrack = event => {
         console.info(`Add track event : ${event}`);
-       if (!localStream) {
-           console.info(`Add track : ${event}`);
-           video.srcObject = event.streams[0]
-           video.play()
-       }
+        if (!localStream) {
+            console.info(`Add track : ${event}`);
+            video.srcObject = event.streams[0]
+            video.play()
+        }
     };
     peerConnection.onsignalingstatechange = event => {
         console.info(`Signaling state changed: ${JSON.stringify(event)}`)
@@ -85,66 +73,46 @@ const startVideo = async () => {
     console.info('Play video');
 }
 
-const startBroadcast = async () => {
+const startStream = async () => {
     peerConnection = createPeerConnection()
     await startVideo();
     localStream.getTracks().forEach(track => peerConnection.addTrack(track));
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer)
-    sendMessage(PresenterOfferMessage, {
+    sendMessage(StartStreamMessage, {
         sdpOffer: offer.sdp
     })
 }
 
 const startWatch = async () => {
     peerConnection = createPeerConnection()
-    const offer = await peerConnection.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: true })
+    const offer = await peerConnection.createOffer({offerToReceiveAudio: false, offerToReceiveVideo: true})
     await peerConnection.setLocalDescription(offer)
-    sendMessage(ViewerOfferMessage, {
+    sendMessage(StartWatchMessage, {
         sdpOffer: offer.sdp
     })
 }
 
-const setOnMessage = (onMessage) => {
-    ws.onmessage = event => {
-        const parsedData = JSON.parse(event.data)
-        console.info(`WebSocket message received ${JSON.stringify(parsedData)}`)
-        onMessage(parsedData);
-    };
+const handleSdpAnswer = async data => {
+    const {sdpAnswer} = data;
+    const sdp = {type: 'answer', sdp: sdpAnswer}
+    await peerConnection.setRemoteDescription(sdp)
+    console.info('Set remote description');
+}
+
+const handleIceCandidate = async data => {
+    const {candidate} = data;
+    const iceCandidate = new RTCIceCandidate(candidate);
+    await peerConnection.addIceCandidate(iceCandidate);
+    console.info('Add ice candidate');
+}
+
+const handlers = {
+    [SdpAnswerMessage]: handleSdpAnswer,
+    [IceCandidateMessage]: handleIceCandidate,
 };
 
-const onMessage = async data => {
-    const type = data.type;
-    if (type === AcceptedViewerResponse || type === AcceptedPresenterResponse) {
-        const {sdpAnswer} = data;
-        const sdp = {type: 'answer', sdp: sdpAnswer}
-        await peerConnection.setRemoteDescription(sdp)
-        console.info('Set remote description');
-        return;
-    }
-    if (type === IceCandidateResponse) {
-        const {candidate} = data;
-        const iceCandidate = new RTCIceCandidate(candidate);
-        await peerConnection.addIceCandidate(iceCandidate);
-        console.info('Add ice candidate');
-        return;
-    }
-    console.error(`Unrecognized message type: ${JSON.stringify(data)}`)
-};
+setHandlers(handlers);
 
-ws.onerror = (event) => {
-    console.error(`WebSocket error observed: ${event}`);
-};
-
-ws.onopen = () => {
-    console.info(`WebSocket is open: ${CALL_ENDPOINT}`);
-};
-
-ws.onclose = () => {
-    console.info('WebSocket is closed');
-};
-
-btnStartBroadcast.addEventListener('click', startBroadcast)
+btnStartBroadcast.addEventListener('click', startStream)
 btnStartWatch.addEventListener('click', startWatch)
-
-setOnMessage(onMessage);

@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class AcceptedViewerResponse implements Message {
+@AllArgsConstructor
+public class SdpAnswerMessage implements Message {
     private String sdpAnswer;
 }

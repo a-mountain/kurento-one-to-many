@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class RejectedPresenterResponse implements Message {
+@AllArgsConstructor
+public class RejectedViewerMessage implements Message {
     private String rejectionReasonMessage;
 }
