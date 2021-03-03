@@ -1,7 +1,7 @@
 package com.example.server.lib;
 
 import com.example.server.messages.Message;
-import com.example.server.services.MessageConverter;
+import com.example.server.services.MessageConverterService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,7 @@ class MessageDispatcherTest {
         var objectMapper = new ObjectMapper();
         var message = new TestMessage("test");
         var jsonMessage = new JsonMessage(message.getClass().getSimpleName(), objectMapper.convertValue(message, JsonNode.class));
-        var messageDispatcher = new MessageDispatcher(new MessageConverter());
+        var messageDispatcher = new MessageDispatcher(new MessageConverterService());
         messageDispatcher.addHandler(TestMessage.class, this::handler);
         var sessionMock = mock(WebSocketSession.class);
         var json = objectMapper.writeValueAsString(jsonMessage);

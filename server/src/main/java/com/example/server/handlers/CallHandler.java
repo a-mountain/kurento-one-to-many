@@ -6,7 +6,7 @@ import com.example.server.messages.bi.IceCandidateMessage;
 import com.example.server.messages.bi.StopCommunicationMessage;
 import com.example.server.messages.in.StartStreamMessage;
 import com.example.server.messages.in.StartWatchMessage;
-import com.example.server.services.CallService;
+import com.example.server.services.KurentoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,36 +21,36 @@ import javax.annotation.Nonnull;
 @Slf4j
 public class CallHandler extends TextWebSocketHandler {
 
-    private final CallService callService;
+    private final KurentoService kurentoService;
     private final MessagingService messagingService;
     private final MessageDispatcher dispatcher;
 
     @Autowired
-    public CallHandler(CallService callService, MessagingService messagingService, MessageDispatcher dispatcher) {
-        this.callService = callService;
+    public CallHandler(KurentoService kurentoService, MessagingService messagingService, MessageDispatcher dispatcher) {
+        this.kurentoService = kurentoService;
         this.messagingService = messagingService;
         this.dispatcher = dispatcher;
         dispatcher
-                .addHandler(IceCandidateMessage.class, this::handleIceCandidate)
                 .addHandler(StartWatchMessage.class, this::startWatch)
                 .addHandler(StartStreamMessage.class, this::startStream)
-                .addHandler(StopCommunicationMessage.class, this::stopCommunication);
+                .addHandler(StopCommunicationMessage.class, this::stopCommunication)
+                .addHandler(IceCandidateMessage.class, this::handleIceCandidate);
     }
 
     private void handleIceCandidate(IceCandidateMessage message, WebSocketSession session) {
-        callService.handleIceCandidate(session.getId(), message);
+        kurentoService.handleIceCandidate(session.getId(), message);
     }
 
     private void startWatch(StartWatchMessage message, WebSocketSession session) {
-        callService.startWatch(session.getId(), message);
+        kurentoService.startWatch(session.getId(), message);
     }
 
     private void startStream(StartStreamMessage message, WebSocketSession session) {
-        callService.startStreaming(session.getId(), message);
+        kurentoService.startStreaming(session.getId(), message);
     }
 
     private void stopCommunication(StopCommunicationMessage message, WebSocketSession session) {
-        callService.stop(session.getId());
+        kurentoService.stop(session.getId());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class CallHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(@Nonnull WebSocketSession session, @Nonnull CloseStatus status) {
         messagingService.removeWebSocketSession(session);
-        callService.stop(session.getId());
+        kurentoService.stop(session.getId());
     }
 
     @Override

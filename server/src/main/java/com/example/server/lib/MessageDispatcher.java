@@ -1,7 +1,7 @@
 package com.example.server.lib;
 
 import com.example.server.messages.Message;
-import com.example.server.services.MessageConverter;
+import com.example.server.services.MessageConverterService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +17,9 @@ import java.util.Map;
 public class MessageDispatcher {
 
     private final Map<String, TypedHandler<?>> handlers = new HashMap<>();
-    private final MessageConverter converter;
+    private final MessageConverterService converter;
 
-    public MessageDispatcher(MessageConverter converter) {
+    public MessageDispatcher(MessageConverterService converter) {
         this.converter = converter;
     }
 

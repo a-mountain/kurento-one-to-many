@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MessagingService {
 
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final MessageConverter converter;
+    private final MessageConverterService converter;
 
-    public MessagingService(MessageConverter converter) {
+    public MessagingService(MessageConverterService converter) {
         this.converter = converter;
     }
 

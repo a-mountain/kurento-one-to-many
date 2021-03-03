@@ -9,7 +9,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MessageConverter {
+public class MessageConverterService {
 
     private final ObjectMapper mapper = new ObjectMapper()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

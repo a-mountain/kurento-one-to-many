@@ -1,18 +1,21 @@
-import {sendMessage, setHandlers} from "./socket.js";
-
+import {sendMessage, setHandlers, initSocket} from "./socket.js";
 
 //bi
 const IceCandidateMessage = 'IceCandidateMessage';
+const StopCommunicationMessage = 'StopCommunicationMessage';
 // in
 const StartStreamMessage = 'StartStreamMessage';
 const StartWatchMessage = 'StartWatchMessage';
 // out
 const SdpAnswerMessage = 'SdpAnswerMessage';
+const RejectionMessage = 'RejectionMessage';
 
 const video = document.querySelector('#stream');
 const btnStartWatch = document.querySelector('#watch');
 const btnStartBroadcast = document.querySelector('#broadcast');
 const btnStop = document.querySelector('#stop');
+
+initSocket();
 
 const displayMediaConstraints = {
     video: {
@@ -93,6 +96,10 @@ const startWatch = async () => {
     })
 }
 
+const stopStream = stream => {
+    stream.getTracks().forEach(track => track.stop());
+}
+
 const handleSdpAnswer = async data => {
     const {sdpAnswer} = data;
     const sdp = {type: 'answer', sdp: sdpAnswer}
@@ -107,9 +114,36 @@ const handleIceCandidate = async data => {
     console.info('Add ice candidate');
 }
 
+const handleRejection = async data => {
+    const {reason} = data;
+    alert(reason);
+}
+
+// const handleStopCommunication = async () => {
+//     console.log('Stop communication');
+//     try {
+//         if (peerConnection && peerConnection.signalingState !== 'closed') {
+//             if (localStream) {
+//                 localStream.getTracks().forEach(track => peerConnection.removeTrack(track));
+//             }
+//             peerConnection.close();
+//         }
+//         if (localStream) {
+//             localStream.getTracks().forEach(track => localStream.removeTrack(track));
+//         }
+//         localStream = null;
+//         video.srcObject = null;
+//         video.stop();
+//     } catch (e) {
+//         console.error("Stop ")
+//     }
+// }
+
 const handlers = {
     [SdpAnswerMessage]: handleSdpAnswer,
     [IceCandidateMessage]: handleIceCandidate,
+    [RejectionMessage]: handleRejection,
+    // [StopCommunicationMessage]: handleStopCommunication,
 };
 
 setHandlers(handlers);

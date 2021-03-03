@@ -1,5 +1,5 @@
 const CALL_ENDPOINT = 'ws://localhost:8443/call';
-const ws = new WebSocket(CALL_ENDPOINT);
+let ws;
 const OPEN = 1;
 
 let endpointHandlers;
@@ -35,18 +35,18 @@ const onMessage = async (type, message) => {
     console.error(`Unrecognized message type: ${JSON.stringify(message)}`)
 };
 
-ws.onerror = (event) => {
-    console.error(`WebSocket error observed: ${event}`);
-};
+const initSocket = () => {
+    ws = new WebSocket(CALL_ENDPOINT);
+    ws.onerror = (event) => {
+        console.error(`WebSocket error observed: ${JSON.stringify(event)}`);
+    };
+    ws.onopen = () => {
+        console.info(`WebSocket is open: ${CALL_ENDPOINT}`);
+    };
+    ws.onclose = () => {
+        console.info('WebSocket is closed');
+    };
+    setOnMessage(onMessage);
+}
 
-ws.onopen = () => {
-    console.info(`WebSocket is open: ${CALL_ENDPOINT}`);
-};
-
-ws.onclose = () => {
-    console.info('WebSocket is closed');
-};
-
-setOnMessage(onMessage);
-
-export {sendMessage, setHandlers}
+export {sendMessage, setHandlers, initSocket}
