@@ -1,6 +1,6 @@
 package com.example.server.services;
 
-import com.example.server.domain.UserSession;
+import com.example.server.lib.MessageConverter;
 import com.example.server.messages.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MessagingService {
 
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final MessageConverterService converter;
+    private final MessageConverter converter;
 
-    public MessagingService(MessageConverterService converter) {
+    public MessagingService(MessageConverter converter) {
         this.converter = converter;
     }
 
@@ -40,9 +40,4 @@ public class MessagingService {
             e.printStackTrace();
         }
     }
-
-    public void sendMessage(UserSession session, Message message) {
-        sendMessage(session.getSessionId(), message);
-    }
-
 }

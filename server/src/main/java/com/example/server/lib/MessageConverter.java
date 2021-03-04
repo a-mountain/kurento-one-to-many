@@ -1,6 +1,5 @@
-package com.example.server.services;
+package com.example.server.lib;
 
-import com.example.server.lib.JsonMessage;
 import com.example.server.messages.Message;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +8,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MessageConverterService {
+public class MessageConverter {
 
     private final ObjectMapper mapper = new ObjectMapper()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

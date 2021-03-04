@@ -1,10 +1,8 @@
 package com.example.server.lib;
 
 import com.example.server.messages.Message;
-import com.example.server.services.MessageConverterService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -17,9 +15,10 @@ import java.util.Map;
 public class MessageDispatcher {
 
     private final Map<String, TypedHandler<?>> handlers = new HashMap<>();
-    private final MessageConverterService converter;
+    private final MessageConverter converter;
 
-    public MessageDispatcher(MessageConverterService converter) {
+    @Autowired
+    public MessageDispatcher(MessageConverter converter) {
         this.converter = converter;
     }
 
@@ -46,12 +45,5 @@ public class MessageDispatcher {
             return;
         }
         log.info("Unrecognized message: {}", payload);
-    }
-
-    @Data
-    @AllArgsConstructor
-    private static class TypedHandler<T extends Message> {
-        private final Class<T> messageType;
-        private final MessageHandler<T> handler;
     }
 }

@@ -66,8 +66,10 @@ public class KurentoService {
             streamerSession.addCandidate(msg.getCandidate());
             return;
         }
-        var viewerSession = viewers.get(sessionId);
-        viewerSession.addCandidate(msg.getCandidate());
+        if (viewers.containsKey(sessionId)) {
+            var viewerSession = viewers.get(sessionId);
+            viewerSession.addCandidate(msg.getCandidate());
+        }
     }
 
     private void sendStreamerAlreadyExistsMessage(String sessionId) {
