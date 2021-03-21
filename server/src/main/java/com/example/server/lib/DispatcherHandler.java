@@ -19,4 +19,8 @@ public class DispatcherHandler extends TextWebSocketHandler {
         log.info("Incoming message: sessionId: {}, payload: {}", session.getId(), message.getPayload());
         dispatcher.dispatch(message, session);
     }
+
+    public static void main(String[] args) {
+        System.out.println(0 / 5);
+    }
 }

@@ -1,6 +1,6 @@
 package com.example.server.services;
 
-import com.example.server.domain.UserSession;
+import com.example.server.media.UserSession;
 import com.example.server.messages.bi.IceCandidateMessage;
 import com.example.server.messages.bi.StopCommunicationMessage;
 import com.example.server.messages.in.StartStreamMessage;
